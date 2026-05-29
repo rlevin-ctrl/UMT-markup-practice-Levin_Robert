@@ -17,7 +17,8 @@ const state = {
     loadedIds: new Set(),
     isLoading: false,
     hasMore: true,
-    allItemsCache: null,  
+    allItems: [],  // всі товари
+    filteredItems: [], // відфільтровані
 };
 
 function setStatus(message = "") {
@@ -66,108 +67,72 @@ function normalizeItems(payload) {
     return Array.isArray(payload) ? payload : [];
 }
 
-async function fetchServerPage() {
-    if (state.query) {
-        if (!state.allItemsCache) {
-            const response = await apiClient.get("/bouquets.json");
-            state.allItemsCache = normalizeItems(response.data?.data ?? response.data);
-        }
+// Завантажуємо ВСІ товари один раз
+async function loadAllItems() {
+    if (state.allItems.length > 0) return;
 
-        const searchTerm = state.query.toLowerCase().trim();
-        const filtered = state.allItemsCache.filter(item =>
+    const response = await apiClient.get("/bouquets.json");
+    state.allItems = normalizeItems(response.data?.data ?? response.data);
+}
+
+// Оновлюємо відображення на основі поточної сторінки
+function updateDisplay() {
+    const start = 0;
+    const end = state.page * state.limit;
+    const itemsToShow = state.filteredItems.slice(start, end);
+
+    // Очищаємо і показуємо нові
+    listEl.innerHTML = "";
+    if (itemsToShow.length > 0) {
+        renderItems(itemsToShow);
+    }
+
+    // Оновлюємо стан кнопки
+    state.hasMore = end < state.filteredItems.length;
+    setLoadMoreVisibility(state.hasMore);
+
+    if (!state.hasMore && state.filteredItems.length > 0) {
+        setStatus("You have reached the end of the collection.");
+    } else {
+        setStatus("");
+    }
+}
+
+// Фільтруємо товари
+function applyFilter() {
+    const searchTerm = state.query.toLowerCase().trim();
+
+    if (!searchTerm) {
+        state.filteredItems = [...state.allItems];
+    } else {
+        state.filteredItems = state.allItems.filter(item =>
             item.title.toLowerCase().includes(searchTerm) ||
             item.desc.toLowerCase().includes(searchTerm)
         );
-
-        const start = (state.page - 1) * state.limit;
-        const end = start + state.limit;
-        const items = filtered.slice(start, end);
-
-        return { items, total: filtered.length };
-    }
-    
-    const params = {
-        _page: state.page,
-        _per_page: state.limit,
-    };
-
-    const response = await apiClient.get("/bouquets.json", { params });
-    const items = normalizeItems(response.data?.data ?? response.data);
-    const total = Number(response.data?.items ?? response.headers?.["x-total-count"] ?? 0);
-
-    return { items, total };
-}
-
-async function fetchStaticPage() {
-    if (!state.allItemsCache) {
-        const response = await apiClient.get("/bouquets.json");
-        state.allItemsCache = normalizeItems(response.data);
     }
 
-    const query = state.query.trim().toLowerCase();
-    const filtered = query
-        ? state.allItemsCache.filter((item) =>
-            `${item.title} ${item.desc}`.toLowerCase().includes(query),
-        )
-        : state.allItemsCache;
-
-    const start = (state.page - 1) * state.limit;
-    const end = start + state.limit;
-    const items = filtered.slice(start, end);
-
-    return { items, total: filtered.length };
-}
-
-async function fetchPage() {
-    return isStaticMode ? fetchStaticPage() : fetchServerPage();
-}
-
-function filterOutDuplicates(items) {
-    const unique = items.filter((item) => !state.loadedIds.has(item.id));
-    unique.forEach((item) => state.loadedIds.add(item.id));
-    return unique;
-}
-
-function resetCatalogStateForFilter() {
+    // Скидаємо сторінку
     state.page = 1;
     state.hasMore = true;
     state.loadedIds.clear();
-    state.allItemsCache = null;  
-    if (listEl) listEl.innerHTML = "";
-    setStatus("");
+
+    if (state.filteredItems.length === 0) {
+        listEl.innerHTML = "";
+        setStatus("No bouquets found for your request.");
+        setLoadMoreVisibility(false);
+    } else {
+        updateDisplay();
+    }
 }
 
-async function loadBouquets({ append = true } = {}) {
-    if (!listEl || state.isLoading || !state.hasMore) return;
+async function loadBouquets() {
+    if (!listEl || state.isLoading) return;
 
     setLoadingState(true);
 
     try {
-        const { items, total } = await fetchPage();
-        const uniqueItems = filterOutDuplicates(items);
-
-        if (!append) {
-            listEl.innerHTML = "";
-        }
-
-        if (uniqueItems.length > 0) {
-            renderItems(uniqueItems);
-            setStatus("");
-        }
-
-        const renderedCount = state.loadedIds.size;
-        state.hasMore = renderedCount < total;
-        setLoadMoreVisibility(state.hasMore);
-
-        if (renderedCount === 0) {
-            setStatus("No bouquets found for your request.");
-            setLoadMoreVisibility(false);
-            return;
-        }
-
-        if (!state.hasMore) {
-            setStatus("You have reached the end of the collection.");
-        }
+        await loadAllItems();
+        applyFilter();
     } catch (error) {
         showErrorNotification(extractErrorMessage(error, "Failed to load bouquets."));
         setStatus("Unable to load bouquets right now.");
@@ -177,16 +142,17 @@ async function loadBouquets({ append = true } = {}) {
 }
 
 function handleLoadMore() {
+    if (!state.hasMore || state.isLoading) return;
+
     state.page += 1;
-    loadBouquets({ append: true });
+    updateDisplay();
 }
 
 function handleFilterSubmit(event) {
     event.preventDefault();
     const nextQuery = searchInputEl?.value.trim() ?? "";
     state.query = nextQuery;
-    resetCatalogStateForFilter();
-    loadBouquets({ append: true });
+    loadBouquets();
 }
 
 function bootBouquets() {
@@ -198,12 +164,10 @@ function bootBouquets() {
     searchInputEl?.addEventListener("input", () => {
         if ((searchInputEl.value ?? "").trim() === state.query) return;
         state.query = (searchInputEl.value ?? "").trim();
-        resetCatalogStateForFilter();
-        loadBouquets({ append: true });
+        loadBouquets();
     });
 
-    setLoadMoreVisibility(true);
-    loadBouquets({ append: true });
+    loadBouquets();
 }
 
 bootBouquets();
