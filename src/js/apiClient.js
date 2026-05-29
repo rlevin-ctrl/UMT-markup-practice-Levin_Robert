@@ -3,16 +3,10 @@
 const isStaticMode = import.meta.env.VITE_API_MODE === "static";
 
 function resolveApiBaseURL() {
-    if (isStaticMode) {
-        return '/UMT-markup-practice-Levin_Robert/api/';
-    }
-
     const raw = import.meta.env.VITE_API_BASE_URL ?? "api";
-
     if (/^https?:\/\//i.test(raw)) {
         return raw;
     }
-
     const segment = raw.replace(/^\/+|\/+$/g, "");
     const siteBase = new URL(import.meta.env.BASE_URL, "http://vite.local");
     return new URL(segment, siteBase).pathname;
@@ -20,7 +14,7 @@ function resolveApiBaseURL() {
 
 export const apiClient = axios.create({
     baseURL: resolveApiBaseURL(),
-    timeout: 15000,
+    timeout: 15_000,
 });
 
 if (isStaticMode) {
@@ -28,16 +22,11 @@ if (isStaticMode) {
         if (typeof config.url !== "string" || config.url.length === 0) {
             return config;
         }
-
         const [pathPart, queryPart] = config.url.split("?", 2);
-        
-        if (pathPart && pathPart.endsWith('.json')) {
+        if (!pathPart || /\.[a-z0-9]+$/i.test(pathPart)) {
             return config;
         }
-        
-        const newPath = `${pathPart}.json`;
-        config.url = queryPart ? `${newPath}?${queryPart}` : newPath;
-
+        config.url = queryPart ? `${pathPart}.json?${queryPart}` : `${pathPart}.json`;
         console.log('API Request:', config.baseURL + config.url);
         return config;
     });
