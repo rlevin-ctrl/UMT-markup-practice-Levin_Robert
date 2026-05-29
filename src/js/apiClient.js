@@ -3,10 +3,8 @@
 const isStaticMode = import.meta.env.VITE_API_MODE === "static";
 
 function resolveApiBaseURL() {
-
     if (isStaticMode) {
-        const baseUrl = import.meta.env.BASE_URL || '/';
-        return `${baseUrl}api/`;
+        return '/UMT-markup-practice-Levin_Robert/api/';
     }
 
     const raw = import.meta.env.VITE_API_BASE_URL ?? "api";
@@ -30,16 +28,16 @@ if (isStaticMode) {
         if (typeof config.url !== "string" || config.url.length === 0) {
             return config;
         }
-
-        const [pathPart, queryPart] = config.url.split("?", 2);
         
+        const [pathPart, queryPart] = config.url.split("?", 2);
+
+        // Якщо вже є .json - не додаємо
         if (pathPart && pathPart.endsWith('.json')) {
             return config;
         }
-
-        config.url = queryPart
-            ? `${pathPart}.json?${queryPart}`
-            : `${pathPart}.json`;
+        
+        const newPath = `${pathPart}.json`;
+        config.url = queryPart ? `${newPath}?${queryPart}` : newPath;
 
         console.log('API Request:', config.baseURL + config.url);
         return config;
