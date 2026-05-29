@@ -6,7 +6,7 @@
       "desc": "A delicate blend of peonies, tulips, and roses — perfect for springtime gifting.",
       "longDesc": "Each stem is carefully selected to create a bouquet that radiates freshness, elegance, and the gentle charm of spring. Whether you're celebrating a birthday, sending love, or simply brightening someone's day, this arrangement is sure to bring warm smiles and lasting impressions.",
       "price": "$35",
-      "img": "/images/gallery-3.jpg"
+      "img": "./images/gallery-3.jpg"
     },
     {
       "id": 2,
@@ -14,7 +14,7 @@
       "desc": "A stylish composition of roses, greenery, and vibrant berries — bold and elegant.",
       "longDesc": "This bold arrangement combines deep red roses with fresh greenery and vibrant berries. Perfect for those who appreciate dramatic floral design. The rich colors and textures create a statement piece that will be remembered.",
       "price": "$40",
-      "img": "/images/gallery-1.jpg"
+      "img": "./images/gallery-1.jpg"
     },
     {
       "id": 3,
@@ -22,7 +22,7 @@
       "desc": "A rich bouquet with lavender, lisianthus, and roses — deep hues and gentle fragrance.",
       "longDesc": "Immerse yourself in the soothing beauty of lavender and lisianthus. This romantic arrangement features deep purple hues and delicate roses, creating a dreamy atmosphere perfect for anniversaries or just because.",
       "price": "$55",
-      "img": "/images/gallery-2.jpg"
+      "img": "./images/gallery-2.jpg"
     }
   ],
 
@@ -70,7 +70,7 @@
       "title": "Peach Meadow",
       "desc": "A soft and radiant arrangement of peach and blush roses.",
       "price": "$55",
-      "img": "/images/catalog-7.jpg",
+      "img": "./images/catalog-7.jpg",
       "category": "roses"
     },
     {
@@ -78,7 +78,7 @@
       "title": "Blush Romance",
       "desc": "Deep pink and ivory roses with silver eucalyptus.",
       "price": "$34",
-      "img": "/images/catalog-5.jpg",
+      "img": "./images/catalog-5.jpg",
       "category": "roses"
     },
     {
@@ -86,7 +86,7 @@
       "title": "Pastel Garden",
       "desc": "Pastel spray roses and greenery in a woven basket.",
       "price": "$40",
-      "img": "/images/catalog-2.jpg",
+      "img": "./images/catalog-2.jpg",
       "category": "pastel"
     },
     {
@@ -94,7 +94,7 @@
       "title": "Tulip Charm",
       "desc": "Bright tulips and roses in a lavender box.",
       "price": "$61",
-      "img": "/images/catalog-6.jpg",
+      "img": "./images/catalog-6.jpg",
       "category": "tulips"
     },
     {
@@ -102,7 +102,7 @@
       "title": "Berry Bloom",
       "desc": "Rich pink, purple, and cream blooms with greens.",
       "price": "$32",
-      "img": "/images/catalog-4.jpg",
+      "img": "./images/catalog-4.jpg",
       "category": "seasonal"
     },
     {
@@ -110,7 +110,7 @@
       "title": "Sweet Whisper",
       "desc": "Peonies, roses, and lilac-toned accents.",
       "price": "$40",
-      "img": "/images/catalog-1.jpg",
+      "img": "./images/catalog-1.jpg",
       "category": "peonies"
     },
     {
@@ -118,7 +118,7 @@
       "title": "Field Joy",
       "desc": "Sunflowers, lisianthus, and daisies.",
       "price": "$49",
-      "img": "/images/catalog-8.jpg",
+      "img": "./images/catalog-8.jpg",
       "category": "seasonal"
     },
     {
@@ -126,7 +126,7 @@
       "title": "Soft Bloom",
       "desc": "Pink carnations and roses in satin paper.",
       "price": "$37",
-      "img": "/images/catalog-3.jpg",
+      "img": "./images/catalog-3.jpg",
       "category": "pastel"
     },
     {
@@ -134,7 +134,7 @@
       "title": "Moonlight Petals",
       "desc": "White roses and lisianthus in a minimalist wrap.",
       "price": "$45",
-      "img": "/images/catalog-5.jpg",
+      "img": "./images/catalog-5.jpg",
       "category": "roses"
     },
     {
@@ -142,7 +142,7 @@
       "title": "Sunny Picnic",
       "desc": "Sunflowers, chamomile and fresh greenery.",
       "price": "$39",
-      "img": "/images/catalog-8.jpg",
+      "img": "./images/catalog-8.jpg",
       "category": "seasonal"
     },
     {
@@ -150,7 +150,7 @@
       "title": "Lilac Poem",
       "desc": "Gentle lilac blooms with cream roses.",
       "price": "$52",
-      "img": "/images/catalog-1.jpg",
+      "img": "./images/catalog-1.jpg",
       "category": "peonies"
     },
     {
@@ -158,7 +158,7 @@
       "title": "Morning Dew",
       "desc": "Light peach and ivory buds with eucalyptus.",
       "price": "$41",
-      "img": "/images/catalog-7.jpg",
+      "img": "./images/catalog-7.jpg",
       "category": "pastel"
     }
   ]
