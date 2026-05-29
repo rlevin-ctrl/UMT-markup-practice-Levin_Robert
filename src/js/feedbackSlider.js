@@ -1,125 +1,46 @@
-﻿import Swiper from "swiper";
-import { Navigation, A11y } from "swiper/modules";
-import "swiper/css";
-import "swiper/css/navigation";
+﻿import axios from "axios";
 
-import { apiClient } from "./apiClient";
-import { showErrorNotification } from "./notifications";
-import { extractErrorMessage } from "./utils";
+const isStaticMode = import.meta.env.VITE_API_MODE === "static";
 
-const feedbackSliderStage = document.querySelector("#feedback-slider-stage");
-const feedbackSliderTrack = document.querySelector("#feedback-slider-list");
-const feedbackLoader = document.querySelector("#feedback-loader");
-const feedbackSliderViewport = document.querySelector(".feedback-slider-viewport");
-
-function prefersReducedMotion() {
-    return window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-}
-
-function buildFeedbackCard(feedback) {
-    const card = document.createElement("div");
-    card.className = "feedback-item";
-
-    const text = document.createElement("p");
-    text.className = "feedback-text";
-    text.textContent = feedback.text ?? "";
-
-    const author = document.createElement("p");
-    author.className = "feedback-author";
-    author.textContent = feedback.author ?? "";
-
-    card.append(text, author);
-    return card;
-}
-
-function setFeedbackLoading(isLoading) {
-    if (feedbackLoader) feedbackLoader.hidden = !isLoading;
-    if (feedbackSliderViewport) {
-        feedbackSliderViewport.setAttribute("aria-busy", isLoading ? "true" : "false");
-    }
-}
-
-async function bootFeedbackSlider() {
-    if (!feedbackSliderStage || !feedbackSliderTrack) {
-        setFeedbackLoading(false);
-        return;
+function resolveApiBaseURL() {
+    if (isStaticMode) {
+        const baseUrl = import.meta.env.BASE_URL || '/';
+        return `${baseUrl}api/`;
     }
 
-    try {
-        const response = await apiClient.get("/feedbacks");
-        const feedbackItems = Array.isArray(response.data) ? response.data : [];
+    const raw = import.meta.env.VITE_API_BASE_URL ?? "api";
 
-        if (feedbackItems.length === 0) return;
+    if (/^https?:\/\//i.test(raw)) {
+        return raw;
+    }
 
-        function createLoopableItems(sourceItems) {
-            if (!Array.isArray(sourceItems) || sourceItems.length === 0) return [];
-            
-            const minSlidesForLoop = 6;
-            const loopable = [...sourceItems];
+    const segment = raw.replace(/^\/+|\/+$/g, "");
+    const siteBase = new URL(import.meta.env.BASE_URL, "http://vite.local");
+    return new URL(segment, siteBase).pathname;
+}
 
-            while (loopable.length < minSlidesForLoop) {
-                loopable.push(...sourceItems);
-            }
+export const apiClient = axios.create({
+    baseURL: resolveApiBaseURL(),
+    timeout: 15000,
+});
 
-            return loopable;
+if (isStaticMode) {
+    apiClient.interceptors.request.use((config) => {
+        if (typeof config.url !== "string" || config.url.length === 0) {
+            return config;
         }
-
-        const loopableFeedbackItems = createLoopableItems(feedbackItems);
-
-        feedbackSliderTrack.replaceChildren();
-
-        for (const item of loopableFeedbackItems) {
-            const slide = document.createElement("li");
-            slide.className = "swiper-slide feedback-slider-slide";
-            slide.append(buildFeedbackCard(item));
-            feedbackSliderTrack.append(slide);
+        
+        const [pathPart, queryPart] = config.url.split("?", 2);
+        
+        let cleanPath = pathPart;
+        
+        if (!cleanPath.endsWith('.json')) {
+            cleanPath = `${cleanPath}.json`;
         }
+        
+        config.url = queryPart ? `${cleanPath}?${queryPart}` : cleanPath;
 
-        new Swiper(feedbackSliderStage, {
-            modules: [Navigation, A11y],
-            slidesPerView: 1,
-            spaceBetween: 32,
-            loop: true,
-            watchOverflow: false,
-            speed: prefersReducedMotion() ? 0 : 480,
-
-            observer: true,
-            observeParents: true,
-
-            navigation: {
-                prevEl: "[data-feedback-prev]",
-                nextEl: "[data-feedback-next]",
-            },
-
-            breakpoints: {
-                768: {
-                    slidesPerView: 2,
-                    spaceBetween: 32,
-                    allowTouchMove: true,
-                },
-                1440: {
-                    slidesPerView: 3,
-                    spaceBetween: 32,
-                    allowTouchMove: true,
-                },
-            },
-
-            on: {
-                breakpoint(sw) {
-                    sw.params.speed = 0;
-                    sw.slideTo(0, 0, false);
-                    requestAnimationFrame(() => {
-                        sw.params.speed = prefersReducedMotion() ? 0 : 480;
-                    });
-                },
-            },
-        });
-
-    } catch (error) {
-        showErrorNotification(extractErrorMessage(error, "Failed to load feedback."));
-    } finally {
-        setFeedbackLoading(false);
-    }
+        console.log('API Request URL:', config.baseURL + config.url);
+        return config;
+    });
 }
-
-bootFeedbackSlider();
