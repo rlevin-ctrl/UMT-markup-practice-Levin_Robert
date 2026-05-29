@@ -28,10 +28,9 @@ if (isStaticMode) {
         if (typeof config.url !== "string" || config.url.length === 0) {
             return config;
         }
-        
-        const [pathPart, queryPart] = config.url.split("?", 2);
 
-        // Якщо вже є .json - не додаємо
+        const [pathPart, queryPart] = config.url.split("?", 2);
+        
         if (pathPart && pathPart.endsWith('.json')) {
             return config;
         }
