@@ -2,147 +2,111 @@ import { apiClient } from "./apiClient";
 import { showErrorNotification } from "./notifications";
 import { extractErrorMessage } from "./utils";
 
-const listEl = document.querySelector("#catalog-list");
-const loadMoreBtn = document.querySelector("#catalog-load-more");
-const statusEl = document.querySelector("#catalog-status");
-const filterFormEl = document.querySelector("#catalog-filter-form");
-const searchInputEl = document.querySelector("#catalog-search");
+const itemsPerPage = 4;
 
-const isStaticMode = import.meta.env.VITE_API_MODE === "static";
+const catalogueList = document.getElementById("catalog-list");
+const catalogueListShell = document.querySelector(".catalog-list");
+const catalogueLoader = null;
+const showMoreButton = document.querySelector("#catalog-load-more");
 
-const state = {
-    currentPage: 1,
-    limit: 4,
-    query: "",
-    isLoading: false,
-    allItems: [],
-    filteredItems: [],
-    renderedCount: 0,
-};
+let lastLoadedPage = 0;
+let totalPages = 1;
+let allProducts = [];
 
-function setStatus(message = "") {
-    if (statusEl) statusEl.textContent = message;
+function formatPrice(price) {
+    if (!price) return "-";
+    const str = String(price).trim();
+    if (str.startsWith("$")) return str;
+    const num = Number.parseInt(str.replace(/\s/g, ""), 10);
+    if (Number.isNaN(num)) return str;
+    return `$${num}`;
 }
 
-function setLoadingState(isLoading) {
-    state.isLoading = isLoading;
-    if (loadMoreBtn) {
-        loadMoreBtn.disabled = isLoading;
-        loadMoreBtn.textContent = isLoading ? "Loading..." : "Show More";
+function buildItemMarkup() {
+    return `
+    <li class="catalog-item">
+      <img class="catalog-item-img" alt="">
+      <p class="catalog-name"></p>
+      <p class="catalog-desc"></p>
+      <p class="catalog-price"></p>
+    </li>`;
+}
+
+function fillItem(listItem, product) {
+    const image = listItem.querySelector(".catalog-item-img");
+    image.src = product.img ?? "";
+    image.alt = product.title ?? "";
+    listItem.querySelector(".catalog-name").textContent = product.title ?? "";
+    listItem.querySelector(".catalog-desc").textContent = product.desc ?? "";
+    listItem.querySelector(".catalog-price").textContent = formatPrice(product.price);
+}
+
+function setCatalogueInitialLoading(isLoading) {
+    if (showMoreButton) {
+        showMoreButton.disabled = isLoading;
+        showMoreButton.textContent = isLoading ? "Loading..." : "Show More";
     }
 }
 
-function buildBouquetMarkup(items) {
-    return items
-        .map(
-            (item) => `
-      <li class="catalog-item" data-bouquet-id="${item.id}">
-        <img
-          src="${item.img}"
-          srcset="${item.img} 1x, ${item.img} 2x"
-          sizes="(min-width: 1440px) 296px, (min-width: 768px) calc((100vw - 88px) / 2), calc(100vw - 40px)"
-          alt="${item.title}"
-        />
-        <p class="catalog-name">${item.title}</p>
-        <p class="catalog-desc">${item.desc}</p>
-        <p class="catalog-price">${item.price}</p>
-      </li>
-    `,
-        )
-        .join("");
-}
+function renderChunk(products, shouldReplace) {
+    if (!catalogueList) return;
+    if (shouldReplace) catalogueList.replaceChildren();
 
-function renderItems(items) {
-    if (!listEl || items.length === 0) return;
-    listEl.insertAdjacentHTML("beforeend", buildBouquetMarkup(items));
-}
+    const startIndex = catalogueList.children.length;
+    catalogueList.insertAdjacentHTML("beforeend", products.map(() => buildItemMarkup()).join(""));
 
-function normalizeItems(payload) {
-    return Array.isArray(payload) ? payload : [];
-}
-
-async function loadAllItems() {
-    if (state.allItems.length > 0) return;
-
-    const response = await apiClient.get("/bouquets.json");
-    state.allItems = normalizeItems(response.data?.data ?? response.data);
-    applyFilterAndRender();
-}
-
-function applyFilterAndRender() {
-    const searchTerm = state.query.toLowerCase().trim();
-    let filtered = [...state.allItems];
-
-    if (searchTerm) {
-        filtered = filtered.filter(item =>
-            item.title.toLowerCase().includes(searchTerm) ||
-            item.desc.toLowerCase().includes(searchTerm)
-        );
-    }
-
-    state.filteredItems = filtered;
-    state.currentPage = 1;
-    state.renderedCount = 0;
-    
-    listEl.innerHTML = "";
-
-    if (filtered.length === 0) {
-        setStatus("No bouquets found for your request.");
-        loadMoreBtn.hidden = true;
-        return;
-    }
-
-    loadMoreItems();
-}
-
-function loadMoreItems() {
-    const start = state.renderedCount;
-    const end = Math.min(start + state.limit, state.filteredItems.length);
-    const newItems = state.filteredItems.slice(start, end);
-
-    if (newItems.length > 0) {
-        renderItems(newItems);
-        state.renderedCount = end;
-    }
-    
-    const hasMore = state.renderedCount < state.filteredItems.length;
-    loadMoreBtn.hidden = !hasMore;
-
-    if (!hasMore && state.filteredItems.length > 0) {
-        setStatus("You have reached the end of the collection.");
-    } else {
-        setStatus("");
+    const listItems = catalogueList.querySelectorAll(":scope > .catalog-item");
+    for (let i = 0; i < products.length; i++) {
+        fillItem(listItems[startIndex + i], products[i]);
     }
 }
 
-function handleLoadMore() {
-    if (state.isLoading) return;
-    loadMoreItems();
+function updateShowMore() {
+    if (!showMoreButton) return;
+    showMoreButton.hidden = lastLoadedPage >= totalPages;
 }
 
-function handleFilterSubmit(event) {
-    event.preventDefault();
-    const nextQuery = searchInputEl?.value.trim() ?? "";
-    state.query = nextQuery;
-    applyFilterAndRender();
-}
+async function fetchPage(page, appendItems = false) {
+    const isInitial = !appendItems;
 
-function bootBouquets() {
-    if (!listEl || !loadMoreBtn || !filterFormEl) return;
+    setCatalogueInitialLoading(true);
 
-    loadMoreBtn.addEventListener("click", handleLoadMore);
-    filterFormEl.addEventListener("submit", handleFilterSubmit);
+    try {
+        if (allProducts.length === 0) {
+            const response = await apiClient.get("/bouquets.json");
+            const body = response.data;
 
-    searchInputEl?.addEventListener("input", () => {
-        if ((searchInputEl.value ?? "").trim() === state.query) return;
-        state.query = (searchInputEl.value ?? "").trim();
-        applyFilterAndRender();
-    });
+            if (Array.isArray(body)) {
+                allProducts = body;
+            } else {
+                allProducts = body?.data ?? [];
+            }
+        }
 
-    loadAllItems().catch(error => {
+        totalPages = Math.ceil(allProducts.length / itemsPerPage);
+        const start = (page - 1) * itemsPerPage;
+        const chunk = allProducts.slice(start, start + itemsPerPage);
+
+        renderChunk(chunk, !appendItems);
+        lastLoadedPage = page;
+        updateShowMore();
+
+    } catch (error) {
         showErrorNotification(extractErrorMessage(error, "Failed to load bouquets."));
-        setStatus("Unable to load bouquets right now.");
-    });
+    } finally {
+        setCatalogueInitialLoading(false);
+    }
 }
 
-bootBouquets();
+function init() {
+    if (showMoreButton) {
+        showMoreButton.hidden = true;
+        showMoreButton.addEventListener("click", () => {
+            fetchPage(lastLoadedPage + 1, true);
+        });
+    }
+
+    fetchPage(1, false);
+}
+
+init();
