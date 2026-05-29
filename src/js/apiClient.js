@@ -3,6 +3,12 @@
 const isStaticMode = import.meta.env.VITE_API_MODE === "static";
 
 function resolveApiBaseURL() {
+
+    if (isStaticMode) {
+        const baseUrl = import.meta.env.BASE_URL || '/';
+        return `${baseUrl}api/`;
+    }
+
     const raw = import.meta.env.VITE_API_BASE_URL ?? "api";
 
     if (/^https?:\/\//i.test(raw)) {
@@ -10,17 +16,8 @@ function resolveApiBaseURL() {
     }
 
     const segment = raw.replace(/^\/+|\/+$/g, "");
-    
-    const baseUrl = import.meta.env.BASE_URL || '/';
-
-    let fullPath = `${baseUrl}${segment}`.replace(/\/+/g, '/');
-    
-    if (!fullPath.startsWith('/')) {
-        fullPath = '/' + fullPath;
-    }
-
-    console.log('API Base URL:', fullPath); 
-    return fullPath;
+    const siteBase = new URL(import.meta.env.BASE_URL, "http://vite.local");
+    return new URL(segment, siteBase).pathname;
 }
 
 export const apiClient = axios.create({
@@ -35,8 +32,8 @@ if (isStaticMode) {
         }
 
         const [pathPart, queryPart] = config.url.split("?", 2);
-
-        if (!pathPart || /\.[a-z0-9]+$/i.test(pathPart)) {
+        
+        if (pathPart && pathPart.endsWith('.json')) {
             return config;
         }
 
@@ -44,7 +41,7 @@ if (isStaticMode) {
             ? `${pathPart}.json?${queryPart}`
             : `${pathPart}.json`;
 
-        console.log('API Request URL:', config.url); 
+        console.log('API Request:', config.baseURL + config.url);
         return config;
     });
 }
