@@ -5,13 +5,15 @@ import { extractErrorMessage } from "./utils";
 const itemsPerPage = 4;
 
 const catalogueList = document.getElementById("catalog-list");
-const catalogueListShell = document.querySelector(".catalog-list");
-const catalogueLoader = null;
 const showMoreButton = document.querySelector("#catalog-load-more");
+const statusEl = document.querySelector("#catalog-status");
+const filterFormEl = document.querySelector("#catalog-filter-form");
+const searchInputEl = document.querySelector("#catalog-search");
 
 let lastLoadedPage = 0;
 let totalPages = 1;
 let allProducts = [];
+let currentQuery = "";
 
 function formatPrice(price) {
     if (!price) return "-";
@@ -41,7 +43,7 @@ function fillItem(listItem, product) {
     listItem.querySelector(".catalog-price").textContent = formatPrice(product.price);
 }
 
-function setCatalogueInitialLoading(isLoading) {
+function setLoading(isLoading) {
     if (showMoreButton) {
         showMoreButton.disabled = isLoading;
         showMoreButton.textContent = isLoading ? "Loading..." : "Show More";
@@ -64,28 +66,47 @@ function renderChunk(products, shouldReplace) {
 function updateShowMore() {
     if (!showMoreButton) return;
     showMoreButton.hidden = lastLoadedPage >= totalPages;
+
+    if (!showMoreButton.hidden) {
+        if (statusEl) statusEl.textContent = "";
+    } else if (allProducts.length > 0) {
+        if (statusEl) statusEl.textContent = "You have reached the end of the collection.";
+    }
+}
+
+function getFilteredProducts() {
+    if (!currentQuery) return allProducts;
+
+    const searchTerm = currentQuery.toLowerCase().trim();
+    return allProducts.filter(item =>
+        item.title.toLowerCase().includes(searchTerm) ||
+        item.desc.toLowerCase().includes(searchTerm)
+    );
 }
 
 async function fetchPage(page, appendItems = false) {
-    const isInitial = !appendItems;
-
-    setCatalogueInitialLoading(true);
+    setLoading(true);
 
     try {
         if (allProducts.length === 0) {
             const response = await apiClient.get("/bouquets.json");
             const body = response.data;
-
-            if (Array.isArray(body)) {
-                allProducts = body;
-            } else {
-                allProducts = body?.data ?? [];
-            }
+            allProducts = Array.isArray(body) ? body : (body?.data ?? []);
         }
 
-        totalPages = Math.ceil(allProducts.length / itemsPerPage);
+        const filteredProducts = getFilteredProducts();
+        totalPages = Math.ceil(filteredProducts.length / itemsPerPage);
+
+        if (totalPages === 0) {
+            catalogueList.replaceChildren();
+            if (statusEl) statusEl.textContent = "No bouquets found for your request.";
+            if (showMoreButton) showMoreButton.hidden = true;
+            setLoading(false);
+            return;
+        }
+
         const start = (page - 1) * itemsPerPage;
-        const chunk = allProducts.slice(start, start + itemsPerPage);
+        const chunk = filteredProducts.slice(start, start + itemsPerPage);
 
         renderChunk(chunk, !appendItems);
         lastLoadedPage = page;
@@ -93,16 +114,43 @@ async function fetchPage(page, appendItems = false) {
 
     } catch (error) {
         showErrorNotification(extractErrorMessage(error, "Failed to load bouquets."));
+        if (statusEl) statusEl.textContent = "Unable to load bouquets right now.";
     } finally {
-        setCatalogueInitialLoading(false);
+        setLoading(false);
     }
+}
+
+function resetAndLoad() {
+    lastLoadedPage = 0;
+    catalogueList.replaceChildren();
+    fetchPage(1, false);
+}
+
+function handleLoadMore() {
+    if (lastLoadedPage >= totalPages) return;
+    fetchPage(lastLoadedPage + 1, true);
+}
+
+function handleFilterSubmit(event) {
+    event.preventDefault();
+    currentQuery = searchInputEl?.value.trim() ?? "";
+    resetAndLoad();
 }
 
 function init() {
     if (showMoreButton) {
-        showMoreButton.hidden = true;
-        showMoreButton.addEventListener("click", () => {
-            fetchPage(lastLoadedPage + 1, true);
+        showMoreButton.addEventListener("click", handleLoadMore);
+    }
+
+    if (filterFormEl) {
+        filterFormEl.addEventListener("submit", handleFilterSubmit);
+    }
+
+    if (searchInputEl) {
+        searchInputEl.addEventListener("input", () => {
+            if ((searchInputEl.value ?? "").trim() === currentQuery) return;
+            currentQuery = (searchInputEl.value ?? "").trim();
+            resetAndLoad();
         });
     }
 
