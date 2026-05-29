@@ -1219,7 +1219,6 @@ fade
   box-sizing: border-box;
 }
 
-/* CARD */
 .feedback-item {
   width: 100%;
   min-height: 228px;
@@ -1739,9 +1738,6 @@ fade
   font-size: 14px;
 }
 
-/* ========== АДАПТИВ ========== */
-
-/* Мобільні пристрої (до 767px) */
 @media (max-width: 767px) {
   .footer {
     padding: 48px 0;
@@ -1812,7 +1808,6 @@ fade
   }
 }
 
-/* Планшети (768px - 1439px) */
 @media (min-width: 768px) and (max-width: 1439px) {
   .footer {
     padding: 60px 0;
@@ -2070,7 +2065,7 @@ fade
   transform: translateY(-1px);
   opacity: 0.95;
 }
-/* ========== DETAIL MODAL ========== */
+
 .detail-modal {
   max-width: 1280px;
   width: 90%;
@@ -2174,7 +2169,6 @@ fade
   flex-shrink: 0;
 }
 
-/* Планшет */
 @media (min-width: 768px) and (max-width: 1439px) {
   .detail-modal {
     max-width: 704px;
@@ -2223,7 +2217,6 @@ fade
   }
 }
 
-/* Мобільний */
 @media (max-width: 767px) {
   .detail-modal {
     width: calc(100% - 40px);
@@ -2280,7 +2273,6 @@ fade
   }
 }
 
-/* ========== ORDER MODAL ========== */
 .order-modal {
   max-width: 842px;
   width: 90%;

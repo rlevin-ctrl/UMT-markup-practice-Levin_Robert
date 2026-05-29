@@ -53,8 +53,7 @@ async function bootFeedbackSlider() {
 
         function createLoopableItems(sourceItems) {
             if (!Array.isArray(sourceItems) || sourceItems.length === 0) return [];
-
-            // Keep enough slides for seamless looping on desktop (3 per view).
+            
             const minSlidesForLoop = 6;
             const loopable = [...sourceItems];
 
