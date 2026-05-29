@@ -17,7 +17,7 @@ const state = {
     isLoading: false,
     allItems: [],
     filteredItems: [],
-    loadedIds: new Set(),
+    renderedCount: 0,
 };
 
 function setStatus(message = "") {
@@ -52,6 +52,11 @@ function buildBouquetMarkup(items) {
         .join("");
 }
 
+function renderItems(items) {
+    if (!listEl || items.length === 0) return;
+    listEl.insertAdjacentHTML("beforeend", buildBouquetMarkup(items));
+}
+
 function normalizeItems(payload) {
     return Array.isArray(payload) ? payload : [];
 }
@@ -61,21 +66,47 @@ async function loadAllItems() {
 
     const response = await apiClient.get("/bouquets.json");
     state.allItems = normalizeItems(response.data?.data ?? response.data);
-    applyFilter();
+    applyFilterAndRender();
 }
 
-function displayCurrentPage() {
-    const start = 0;
-    const end = state.currentPage * state.limit;
-    const itemsToShow = state.filteredItems.slice(start, end);
+function applyFilterAndRender() {
+    const searchTerm = state.query.toLowerCase().trim();
+    let filtered = [...state.allItems];
+
+    if (searchTerm) {
+        filtered = filtered.filter(item =>
+            item.title.toLowerCase().includes(searchTerm) ||
+            item.desc.toLowerCase().includes(searchTerm)
+        );
+    }
+
+    state.filteredItems = filtered;
+    state.currentPage = 1;
+    state.renderedCount = 0;
     
     listEl.innerHTML = "";
-    if (itemsToShow.length > 0) {
-        renderItems(itemsToShow);
+
+    if (filtered.length === 0) {
+        setStatus("No bouquets found for your request.");
+        loadMoreBtn.hidden = true;
+        return;
+    }
+
+    loadMoreItems();
+}
+
+function loadMoreItems() {
+    const start = state.renderedCount;
+    const end = Math.min(start + state.limit, state.filteredItems.length);
+    const newItems = state.filteredItems.slice(start, end);
+
+    if (newItems.length > 0) {
+        renderItems(newItems);
+        state.renderedCount = end;
     }
     
-    const hasMore = end < state.filteredItems.length;
-    if (loadMoreBtn) loadMoreBtn.hidden = !hasMore;
+    const hasMore = state.renderedCount < state.filteredItems.length;
+    loadMoreBtn.hidden = !hasMore;
 
     if (!hasMore && state.filteredItems.length > 0) {
         setStatus("You have reached the end of the collection.");
@@ -84,59 +115,16 @@ function displayCurrentPage() {
     }
 }
 
-function renderItems(items) {
-    if (!listEl || items.length === 0) return;
-    listEl.insertAdjacentHTML("beforeend", buildBouquetMarkup(items));
-}
-
-function applyFilter() {
-    const searchTerm = state.query.toLowerCase().trim();
-
-    if (!searchTerm) {
-        state.filteredItems = [...state.allItems];
-    } else {
-        state.filteredItems = state.allItems.filter(item =>
-            item.title.toLowerCase().includes(searchTerm) ||
-            item.desc.toLowerCase().includes(searchTerm)
-        );
-    }
-
-    state.currentPage = 1;
-
-    if (state.filteredItems.length === 0) {
-        listEl.innerHTML = "";
-        setStatus("No bouquets found for your request.");
-        if (loadMoreBtn) loadMoreBtn.hidden = true;
-    } else {
-        displayCurrentPage();
-    }
-}
-
-async function loadBouquets() {
-    if (!listEl || state.isLoading) return;
-
-    setLoadingState(true);
-
-    try {
-        await loadAllItems();
-    } catch (error) {
-        showErrorNotification(extractErrorMessage(error, "Failed to load bouquets."));
-        setStatus("Unable to load bouquets right now.");
-    } finally {
-        setLoadingState(false);
-    }
-}
-
 function handleLoadMore() {
-    state.currentPage += 1;
-    displayCurrentPage();
+    if (state.isLoading) return;
+    loadMoreItems();
 }
 
 function handleFilterSubmit(event) {
     event.preventDefault();
     const nextQuery = searchInputEl?.value.trim() ?? "";
     state.query = nextQuery;
-    applyFilter();
+    applyFilterAndRender();
 }
 
 function bootBouquets() {
@@ -148,10 +136,13 @@ function bootBouquets() {
     searchInputEl?.addEventListener("input", () => {
         if ((searchInputEl.value ?? "").trim() === state.query) return;
         state.query = (searchInputEl.value ?? "").trim();
-        applyFilter();
+        applyFilterAndRender();
     });
 
-    loadBouquets();
+    loadAllItems().catch(error => {
+        showErrorNotification(extractErrorMessage(error, "Failed to load bouquets."));
+        setStatus("Unable to load bouquets right now.");
+    });
 }
 
 bootBouquets();
