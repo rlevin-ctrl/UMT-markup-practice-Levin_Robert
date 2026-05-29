@@ -2,7 +2,8 @@
   "devDependencies": {
     "json-server": "^1.0.0-beta.15",
     "prettier": "^3.8.3",
-    "vite": "^8.0.14"
+    "vite": "^8.0.14",
+    "vite-plugin-static-copy": "^4.1.0"
   },
   "name": "umt-markup-practice",
   "version": "1.0.0",

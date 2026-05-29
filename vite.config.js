@@ -1,6 +1,7 @@
 import { defineConfig } from "vite";
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
+import { viteStaticCopy } from 'vite-plugin-static-copy';
 
 const base = '/UMT-markup-practice-Levin_Robert/';
 
@@ -55,7 +56,17 @@ function staticJsonServerEmitter({ source = "db.json", outDir = "api" } = {}) {
 
 export default defineConfig({
     base: base,
-    plugins: [staticJsonServerEmitter()],
+    plugins: [
+        staticJsonServerEmitter(),
+        viteStaticCopy({
+            targets: [
+                {
+                    src: 'public/images/icons/*',
+                    dest: 'images/icons'
+                }
+            ]
+        })
+    ],
     server: {
         port: 4000,
         proxy: {
