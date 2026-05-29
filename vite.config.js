@@ -2,12 +2,7 @@ import { defineConfig } from "vite";
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 
-const repo = process.env.GITHUB_REPOSITORY?.split("/")[1];
-const isGitHubActions = process.env.GITHUB_ACTIONS === "true";
-const isUserOrOrgSite = Boolean(repo?.endsWith(".github.io"));
-
-const base =
-    isGitHubActions && repo && !isUserOrOrgSite ? `/${repo}/` : "/";
+const base = '/UMT-markup-practice-Levin_Robert/';
 
 const jsonServerTarget = "http://127.0.0.1:3000";
 const isStaticApiMode = process.env.VITE_API_MODE === "static";
@@ -59,7 +54,7 @@ function staticJsonServerEmitter({ source = "db.json", outDir = "api" } = {}) {
 }
 
 export default defineConfig({
-    base,
+    base: base,
     plugins: [staticJsonServerEmitter()],
     server: {
         port: 4000,
