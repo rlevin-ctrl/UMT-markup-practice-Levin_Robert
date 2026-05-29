@@ -11,14 +11,13 @@ const searchInputEl = document.querySelector("#catalog-search");
 const isStaticMode = import.meta.env.VITE_API_MODE === "static";
 
 const state = {
-    page: 1,
+    currentPage: 1,
     limit: 4,
     query: "",
-    loadedIds: new Set(),
     isLoading: false,
-    hasMore: true,
-    allItems: [],  // всі товари
-    filteredItems: [], // відфільтровані
+    allItems: [],
+    filteredItems: [],
+    loadedIds: new Set(),
 };
 
 function setStatus(message = "") {
@@ -31,11 +30,6 @@ function setLoadingState(isLoading) {
         loadMoreBtn.disabled = isLoading;
         loadMoreBtn.textContent = isLoading ? "Loading..." : "Show More";
     }
-}
-
-function setLoadMoreVisibility(visible) {
-    if (!loadMoreBtn) return;
-    loadMoreBtn.hidden = !visible;
 }
 
 function buildBouquetMarkup(items) {
@@ -58,47 +52,43 @@ function buildBouquetMarkup(items) {
         .join("");
 }
 
-function renderItems(items) {
-    if (!listEl || items.length === 0) return;
-    listEl.insertAdjacentHTML("beforeend", buildBouquetMarkup(items));
-}
-
 function normalizeItems(payload) {
     return Array.isArray(payload) ? payload : [];
 }
 
-// Завантажуємо ВСІ товари один раз
 async function loadAllItems() {
     if (state.allItems.length > 0) return;
 
     const response = await apiClient.get("/bouquets.json");
     state.allItems = normalizeItems(response.data?.data ?? response.data);
+    applyFilter();
 }
 
-// Оновлюємо відображення на основі поточної сторінки
-function updateDisplay() {
+function displayCurrentPage() {
     const start = 0;
-    const end = state.page * state.limit;
+    const end = state.currentPage * state.limit;
     const itemsToShow = state.filteredItems.slice(start, end);
-
-    // Очищаємо і показуємо нові
+    
     listEl.innerHTML = "";
     if (itemsToShow.length > 0) {
         renderItems(itemsToShow);
     }
+    
+    const hasMore = end < state.filteredItems.length;
+    if (loadMoreBtn) loadMoreBtn.hidden = !hasMore;
 
-    // Оновлюємо стан кнопки
-    state.hasMore = end < state.filteredItems.length;
-    setLoadMoreVisibility(state.hasMore);
-
-    if (!state.hasMore && state.filteredItems.length > 0) {
+    if (!hasMore && state.filteredItems.length > 0) {
         setStatus("You have reached the end of the collection.");
     } else {
         setStatus("");
     }
 }
 
-// Фільтруємо товари
+function renderItems(items) {
+    if (!listEl || items.length === 0) return;
+    listEl.insertAdjacentHTML("beforeend", buildBouquetMarkup(items));
+}
+
 function applyFilter() {
     const searchTerm = state.query.toLowerCase().trim();
 
@@ -111,17 +101,14 @@ function applyFilter() {
         );
     }
 
-    // Скидаємо сторінку
-    state.page = 1;
-    state.hasMore = true;
-    state.loadedIds.clear();
+    state.currentPage = 1;
 
     if (state.filteredItems.length === 0) {
         listEl.innerHTML = "";
         setStatus("No bouquets found for your request.");
-        setLoadMoreVisibility(false);
+        if (loadMoreBtn) loadMoreBtn.hidden = true;
     } else {
-        updateDisplay();
+        displayCurrentPage();
     }
 }
 
@@ -132,7 +119,6 @@ async function loadBouquets() {
 
     try {
         await loadAllItems();
-        applyFilter();
     } catch (error) {
         showErrorNotification(extractErrorMessage(error, "Failed to load bouquets."));
         setStatus("Unable to load bouquets right now.");
@@ -142,17 +128,15 @@ async function loadBouquets() {
 }
 
 function handleLoadMore() {
-    if (!state.hasMore || state.isLoading) return;
-
-    state.page += 1;
-    updateDisplay();
+    state.currentPage += 1;
+    displayCurrentPage();
 }
 
 function handleFilterSubmit(event) {
     event.preventDefault();
     const nextQuery = searchInputEl?.value.trim() ?? "";
     state.query = nextQuery;
-    loadBouquets();
+    applyFilter();
 }
 
 function bootBouquets() {
@@ -164,7 +148,7 @@ function bootBouquets() {
     searchInputEl?.addEventListener("input", () => {
         if ((searchInputEl.value ?? "").trim() === state.query) return;
         state.query = (searchInputEl.value ?? "").trim();
-        loadBouquets();
+        applyFilter();
     });
 
     loadBouquets();
