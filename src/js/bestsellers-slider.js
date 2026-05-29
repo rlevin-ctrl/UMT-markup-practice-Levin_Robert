@@ -10,7 +10,7 @@ const dotsContainer = document.querySelector(".carousel-dots");
 
 async function bootBestsellers() {
     try {
-        const response = await apiClient.get("/bestsellers");
+        const response = await apiClient.get("/bestsellers.json");
         const items = Array.isArray(response.data) ? response.data : [];
 
         if (items.length === 0) return;
@@ -44,7 +44,7 @@ async function bootBestsellers() {
         for (const item of loopableItems) {
             const slide = document.createElement("li");
             slide.className = "swiper-slide bestsellers-slider-slide";
-            
+
             const longDesc = (item.longDesc || item.desc || "")
                 .replace(/"/g, '&quot;')
                 .replace(/</g, '&lt;')
@@ -115,7 +115,7 @@ async function bootBestsellers() {
 
         swiper.on("slideChange", updateDots);
         updateDots();
-        
+
         console.log("✅ Bestsellers slider initialized with longDesc data");
 
     } catch (error) {

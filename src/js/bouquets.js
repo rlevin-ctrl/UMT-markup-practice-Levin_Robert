@@ -68,7 +68,8 @@ function normalizeItems(payload) {
 
 async function fetchServerPage() {
     if (state.query) {
-        const response = await apiClient.get("/bouquets");
+        // ЗМІНЕНО: додано .json
+        const response = await apiClient.get("/bouquets.json");
         const allItems = normalizeItems(response.data?.data ?? response.data);
 
         const searchTerm = state.query.toLowerCase().trim();
@@ -76,7 +77,7 @@ async function fetchServerPage() {
             item.title.toLowerCase().includes(searchTerm) ||
             item.desc.toLowerCase().includes(searchTerm)
         );
-        
+
         const start = (state.page - 1) * state.limit;
         const end = start + state.limit;
         const items = filtered.slice(start, end);
@@ -89,7 +90,8 @@ async function fetchServerPage() {
         _per_page: state.limit,
     };
 
-    const response = await apiClient.get("/bouquets", { params });
+    // ЗМІНЕНО: додано .json
+    const response = await apiClient.get("/bouquets.json", { params });
     const items = normalizeItems(response.data?.data ?? response.data);
     const total = Number(response.data?.items ?? response.headers?.["x-total-count"] ?? 0);
 
@@ -98,7 +100,7 @@ async function fetchServerPage() {
 
 async function fetchStaticPage() {
     if (!Array.isArray(state.staticCache)) {
-        const response = await apiClient.get("/bouquets");
+        const response = await apiClient.get("/bouquets.json");
         state.staticCache = normalizeItems(response.data);
     }
 
