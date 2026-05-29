@@ -17,7 +17,7 @@ const state = {
     loadedIds: new Set(),
     isLoading: false,
     hasMore: true,
-    staticCache: null,
+    allItemsCache: null,  
 };
 
 function setStatus(message = "") {
@@ -68,12 +68,13 @@ function normalizeItems(payload) {
 
 async function fetchServerPage() {
     if (state.query) {
-        // ЗМІНЕНО: додано .json
-        const response = await apiClient.get("/bouquets.json");
-        const allItems = normalizeItems(response.data?.data ?? response.data);
+        if (!state.allItemsCache) {
+            const response = await apiClient.get("/bouquets.json");
+            state.allItemsCache = normalizeItems(response.data?.data ?? response.data);
+        }
 
         const searchTerm = state.query.toLowerCase().trim();
-        const filtered = allItems.filter(item =>
+        const filtered = state.allItemsCache.filter(item =>
             item.title.toLowerCase().includes(searchTerm) ||
             item.desc.toLowerCase().includes(searchTerm)
         );
@@ -84,13 +85,12 @@ async function fetchServerPage() {
 
         return { items, total: filtered.length };
     }
-
+    
     const params = {
         _page: state.page,
         _per_page: state.limit,
     };
 
-    // ЗМІНЕНО: додано .json
     const response = await apiClient.get("/bouquets.json", { params });
     const items = normalizeItems(response.data?.data ?? response.data);
     const total = Number(response.data?.items ?? response.headers?.["x-total-count"] ?? 0);
@@ -99,17 +99,17 @@ async function fetchServerPage() {
 }
 
 async function fetchStaticPage() {
-    if (!Array.isArray(state.staticCache)) {
+    if (!state.allItemsCache) {
         const response = await apiClient.get("/bouquets.json");
-        state.staticCache = normalizeItems(response.data);
+        state.allItemsCache = normalizeItems(response.data);
     }
 
     const query = state.query.trim().toLowerCase();
     const filtered = query
-        ? state.staticCache.filter((item) =>
+        ? state.allItemsCache.filter((item) =>
             `${item.title} ${item.desc}`.toLowerCase().includes(query),
         )
-        : state.staticCache;
+        : state.allItemsCache;
 
     const start = (state.page - 1) * state.limit;
     const end = start + state.limit;
@@ -132,6 +132,7 @@ function resetCatalogStateForFilter() {
     state.page = 1;
     state.hasMore = true;
     state.loadedIds.clear();
+    state.allItemsCache = null;  
     if (listEl) listEl.innerHTML = "";
     setStatus("");
 }
@@ -155,7 +156,7 @@ async function loadBouquets({ append = true } = {}) {
         }
 
         const renderedCount = state.loadedIds.size;
-        state.hasMore = renderedCount < total && items.length > 0;
+        state.hasMore = renderedCount < total;
         setLoadMoreVisibility(state.hasMore);
 
         if (renderedCount === 0) {
