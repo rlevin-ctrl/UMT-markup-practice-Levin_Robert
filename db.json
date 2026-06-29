@@ -160,6 +160,14 @@
       "price": "$41",
       "img": "./images/catalog-7.jpg",
       "category": "pastel"
+    },
+    {
+      "id": 13,
+      "title": "Summer Bloom",
+      "desc": "Bright summer flowers",
+      "price": "$45",
+      "img": "./images/summer-bloom.png",
+      "category": "seasonal"
     }
   ]
 }
