@@ -760,12 +760,14 @@ img {
   margin-top: 48px;
   width: 100%;
   display: flex;
-  justify-content: space-between;
+  flex-direction: column;
+  justify-content: center;
   align-items: center;
+  gap: 16px;
   padding: 0 20px;
   box-sizing: border-box;
   position: relative;
-  z-index: 200; 
+  z-index: 200;
 }
 
 .carousel-dots {
@@ -884,10 +886,10 @@ img {
   .carousel-controls {
     margin-top: 32px;
     padding: 0;
-    flex-direction: column;
-    gap: 16px;
-    justify-content: center;
-    align-items: center;
+  }
+
+  .carousel-controls .carousel-arrows {
+    display: none;
   }
 }
 
@@ -922,6 +924,10 @@ img {
     object-fit: cover;
     display: block;
     border-radius: 16px;
+  }
+
+  .carousel-controls .carousel-arrows {
+    display: none;
   }
 }
 
