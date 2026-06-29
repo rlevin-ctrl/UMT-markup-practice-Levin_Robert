@@ -1665,8 +1665,8 @@ fade
 }
 
 .footer-social-list svg {
-  width: 32px;
-  height: 32px;
+  width: 24px;
+  height: 24px;
   transition: transform 0.3s ease;
 }
 
@@ -1802,11 +1802,6 @@ fade
     width: 100%;
   }
 
-  .footer-social-list svg {
-    width: 28px;
-    height: 28px;
-  }
-
   .footer-divider {
     margin-top: 20px;
   }
@@ -1868,11 +1863,6 @@ fade
 
   .footer-subscribe-form {
     max-width: 420px;
-  }
-
-  .footer-social-list svg {
-    width: 28px;
-    height: 28px;
   }
 
   .footer-divider {
