@@ -313,7 +313,7 @@ img {
   height: 669px;
   overflow: hidden;
 
-  background-image: url("/images/hero-bg.png");
+  background-image: url("/UMT-markup-practice-Levin_Robert/images/hero-bg.png");
   background-size: cover;
   background-position: calc(100%) center;
   background-repeat: no-repeat;
@@ -321,7 +321,7 @@ img {
 
 @media (min-resolution: 2dppx) {
   .hero {
-    background-image: url("/images/hero-bg.png");
+    background-image: url("/UMT-markup-practice-Levin_Robert/images/hero-bg.png");
   }
 }
 
@@ -459,19 +459,19 @@ img {
 
 @media (max-width: 767px) and (min-resolution: 2dppx) {
   .hero {
-    background-image: url("/images/hero-bg.png");
+    background-image: url("/UMT-markup-practice-Levin_Robert/images/hero-bg.png");
   }
 }
 
 @media (min-width: 768px) and (max-width: 1439px) and (min-resolution: 2dppx) {
   .hero {
-    background-image: url("/images/hero-bg.png");
+    background-image: url("/UMT-markup-practice-Levin_Robert/images/hero-bg.png");
   }
 }
 
 @media (min-width: 1440px) and (min-resolution: 2dppx) {
   .hero {
-    background-image: url("/images/hero-bg.png");
+    background-image: url("/UMT-markup-practice-Levin_Robert/images/hero-bg.png");
   }
 }
 

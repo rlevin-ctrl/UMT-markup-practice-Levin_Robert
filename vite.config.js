@@ -55,6 +55,10 @@ function staticJsonServerEmitter({ source = "db.json", outDir = "api" } = {}) {
 
 export default defineConfig({
     base: base,
+    build: {
+        outDir: "docs",
+        emptyOutDir: true,
+    },
     plugins: [staticJsonServerEmitter()],
     server: {
         port: 4000,
