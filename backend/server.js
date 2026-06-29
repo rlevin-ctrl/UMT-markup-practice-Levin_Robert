@@ -1,0 +1,27 @@
+import dotenv from "dotenv";
+import app from "./src/app.js";
+import sequelize from "./src/db/sequelize.js";
+import "./src/models/Bouquet.js";
+import { ensureStorageDirs } from "./src/helpers/photoStorage.js";
+
+dotenv.config();
+
+const PORT = Number(process.env.PORT) || 3000;
+
+async function startServer() {
+    try {
+        await ensureStorageDirs();
+        await sequelize.authenticate();
+        console.log("Database connection successful");
+        await sequelize.sync();
+        app.listen(PORT, () => {
+            console.log(`Server running on port ${PORT}`);
+            console.log(`Swagger UI: http://localhost:${PORT}/api-docs`);
+        });
+    } catch (error) {
+        console.error("Unable to connect to the database:", error.message);
+        process.exit(1);
+    }
+}
+
+startServer();

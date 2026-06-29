@@ -1,0 +1,165 @@
+{
+  "bestsellers": [
+    {
+      "id": 1,
+      "title": "Spring Elegance",
+      "desc": "A delicate blend of peonies, tulips, and roses — perfect for springtime gifting.",
+      "longDesc": "Each stem is carefully selected to create a bouquet that radiates freshness, elegance, and the gentle charm of spring. Whether you're celebrating a birthday, sending love, or simply brightening someone's day, this arrangement is sure to bring warm smiles and lasting impressions.",
+      "price": "$35",
+      "img": "./images/gallery-3.jpg"
+    },
+    {
+      "id": 2,
+      "title": "Berry Chic",
+      "desc": "A stylish composition of roses, greenery, and vibrant berries — bold and elegant.",
+      "longDesc": "This bold arrangement combines deep red roses with fresh greenery and vibrant berries. Perfect for those who appreciate dramatic floral design. The rich colors and textures create a statement piece that will be remembered.",
+      "price": "$40",
+      "img": "./images/gallery-1.jpg"
+    },
+    {
+      "id": 3,
+      "title": "Lavender Dream",
+      "desc": "A rich bouquet with lavender, lisianthus, and roses — deep hues and gentle fragrance.",
+      "longDesc": "Immerse yourself in the soothing beauty of lavender and lisianthus. This romantic arrangement features deep purple hues and delicate roses, creating a dreamy atmosphere perfect for anniversaries or just because.",
+      "price": "$55",
+      "img": "./images/gallery-2.jpg"
+    }
+  ],
+
+  "feedbacks": [
+    {
+      "id": 1,
+      "text": "Flora made my anniversary unforgettable with their beautiful arrangement!",
+      "author": "Emma T."
+    },
+    {
+      "id": 2,
+      "text": "The service was exceptional, and the flowers were fresh!",
+      "author": "Olivia M."
+    },
+    {
+      "id": 3,
+      "text": "Absolutely stunning bouquet! It looked even better than the photo.",
+      "author": "Daniel R."
+    },
+    {
+      "id": 4,
+      "text": "Fast delivery and the bouquet smelled amazing. Highly recommend Flora!",
+      "author": "Sophia L."
+    },
+    {
+      "id": 5,
+      "text": "Beautifully arranged flowers that lasted over a week. Great quality!",
+      "author": "Michael B."
+    },
+    {
+      "id": 6,
+      "text": "Perfect gift for my mom’s birthday. She was thrilled!",
+      "author": "Hannah W."
+    },
+    {
+      "id": 7,
+      "text": "Great customer service and gorgeous flowers. Will order again!",
+      "author": "Lucas P."
+    }
+  ],
+
+  "bouquets": [
+    {
+      "id": 1,
+      "title": "Peach Meadow",
+      "desc": "A soft and radiant arrangement of peach and blush roses.",
+      "price": "$55",
+      "img": "./images/catalog-7.jpg",
+      "category": "roses"
+    },
+    {
+      "id": 2,
+      "title": "Blush Romance",
+      "desc": "Deep pink and ivory roses with silver eucalyptus.",
+      "price": "$34",
+      "img": "./images/catalog-5.jpg",
+      "category": "roses"
+    },
+    {
+      "id": 3,
+      "title": "Pastel Garden",
+      "desc": "Pastel spray roses and greenery in a woven basket.",
+      "price": "$40",
+      "img": "./images/catalog-2.jpg",
+      "category": "pastel"
+    },
+    {
+      "id": 4,
+      "title": "Tulip Charm",
+      "desc": "Bright tulips and roses in a lavender box.",
+      "price": "$61",
+      "img": "./images/catalog-6.jpg",
+      "category": "tulips"
+    },
+    {
+      "id": 5,
+      "title": "Berry Bloom",
+      "desc": "Rich pink, purple, and cream blooms with greens.",
+      "price": "$32",
+      "img": "./images/catalog-4.jpg",
+      "category": "seasonal"
+    },
+    {
+      "id": 6,
+      "title": "Sweet Whisper",
+      "desc": "Peonies, roses, and lilac-toned accents.",
+      "price": "$40",
+      "img": "./images/catalog-1.jpg",
+      "category": "peonies"
+    },
+    {
+      "id": 7,
+      "title": "Field Joy",
+      "desc": "Sunflowers, lisianthus, and daisies.",
+      "price": "$49",
+      "img": "./images/catalog-8.jpg",
+      "category": "seasonal"
+    },
+    {
+      "id": 8,
+      "title": "Soft Bloom",
+      "desc": "Pink carnations and roses in satin paper.",
+      "price": "$37",
+      "img": "./images/catalog-3.jpg",
+      "category": "pastel"
+    },
+    {
+      "id": 9,
+      "title": "Moonlight Petals",
+      "desc": "White roses and lisianthus in a minimalist wrap.",
+      "price": "$45",
+      "img": "./images/catalog-5.jpg",
+      "category": "roses"
+    },
+    {
+      "id": 10,
+      "title": "Sunny Picnic",
+      "desc": "Sunflowers, chamomile and fresh greenery.",
+      "price": "$39",
+      "img": "./images/catalog-8.jpg",
+      "category": "seasonal"
+    },
+    {
+      "id": 11,
+      "title": "Lilac Poem",
+      "desc": "Gentle lilac blooms with cream roses.",
+      "price": "$52",
+      "img": "./images/catalog-1.jpg",
+      "category": "peonies"
+    },
+    {
+      "id": 12,
+      "title": "Morning Dew",
+      "desc": "Light peach and ivory buds with eucalyptus.",
+      "price": "$41",
+      "img": "./images/catalog-7.jpg",
+      "category": "pastel"
+    }
+  ]
+}
