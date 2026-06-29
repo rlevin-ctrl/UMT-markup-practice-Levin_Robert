@@ -1,6 +1,6 @@
 ﻿import axios from "axios";
 
-const isStaticMode = import.meta.env.VITE_API_MODE === "static";
+const isStaticMode = import.meta.env.VITE_API_MODE !== "server";
 
 function resolveApiBaseURL() {
     const raw = import.meta.env.VITE_API_BASE_URL ?? "api";
