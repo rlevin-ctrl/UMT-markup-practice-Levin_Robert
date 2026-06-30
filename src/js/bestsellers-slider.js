@@ -1,4 +1,5 @@
-﻿import Swiper from "swiper";
+﻿import axios from "axios";
+import Swiper from "swiper";
 import { Navigation, A11y } from "swiper/modules";
 import "swiper/css";
 import { apiClient } from "./apiClient";
@@ -8,10 +9,23 @@ import { extractErrorMessage, mapBestsellerToCard } from "./utils";
 const track = document.querySelector("#bestsellers-slider-list");
 const dotsContainer = document.querySelector(".carousel-dots");
 
-async function bootBestsellers() {
+async function loadBestsellers() {
     try {
         const response = await apiClient.get("/bestsellers");
-        const items = (Array.isArray(response.data) ? response.data : []).map(mapBestsellerToCard);
+        return (Array.isArray(response.data) ? response.data : []).map(mapBestsellerToCard);
+    } catch (primaryError) {
+        const fallbackUrl = new URL(
+            `${import.meta.env.BASE_URL}api/bestsellers.json`,
+            window.location.href,
+        ).href;
+        const response = await axios.get(fallbackUrl, { timeout: 15_000 });
+        return (Array.isArray(response.data) ? response.data : []).map(mapBestsellerToCard);
+    }
+}
+
+async function bootBestsellers() {
+    try {
+        const items = await loadBestsellers();
 
         if (items.length === 0) return;
 

@@ -14,7 +14,7 @@ function resolveApiBaseURL() {
 
 export const apiClient = axios.create({
     baseURL: resolveApiBaseURL(),
-    timeout: 15_000,
+    timeout: 45_000,
 });
 
 if (isStaticMode) {

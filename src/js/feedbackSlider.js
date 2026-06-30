@@ -2,6 +2,7 @@
 import { Navigation, A11y } from "swiper/modules";
 import "swiper/css";
 import "swiper/css/navigation";
+import axios from "axios";
 import { apiClient } from "./apiClient";
 import { showErrorNotification } from "./notifications";
 import { extractErrorMessage } from "./utils";
@@ -38,6 +39,20 @@ function setFeedbackLoading(isLoading) {
     }
 }
 
+async function loadFeedbacks() {
+    try {
+        const response = await apiClient.get("/feedbacks");
+        return Array.isArray(response.data) ? response.data : [];
+    } catch {
+        const fallbackUrl = new URL(
+            `${import.meta.env.BASE_URL}api/feedbacks.json`,
+            window.location.href,
+        ).href;
+        const response = await axios.get(fallbackUrl, { timeout: 15_000 });
+        return Array.isArray(response.data) ? response.data : [];
+    }
+}
+
 async function bootFeedbackSlider() {
     if (!feedbackSliderStage || !feedbackSliderTrack) {
         setFeedbackLoading(false);
@@ -45,8 +60,7 @@ async function bootFeedbackSlider() {
     }
 
     try {
-        const response = await apiClient.get("/feedbacks");
-        const feedbackItems = Array.isArray(response.data) ? response.data : [];
+        const feedbackItems = await loadFeedbacks();
 
         if (feedbackItems.length === 0) return;
 

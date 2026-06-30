@@ -90,6 +90,7 @@ function updateShowMore() {
 
 async function fetchBackendPage(page, appendItems = false) {
     const response = await axios.get(`${bouquetsApiBase}/bouquets`, {
+        timeout: 45_000,
         params: {
             page,
             limit: itemsPerPage,
