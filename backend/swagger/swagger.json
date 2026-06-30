@@ -3,7 +3,7 @@
   "info": {
     "title": "Flora API",
     "version": "1.0.0",
-    "description": "REST API for Flora — bouquets, bestsellers, and feedback"
+    "description": "REST API for Flora — bouquets, bestsellers, feedback, and orders"
   },
   "servers": [{ "url": "/api" }],
   "paths": {
@@ -197,6 +197,31 @@
           }
         }
       }
+    },
+    "/orders": {
+      "post": {
+        "summary": "Create order",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/OrderCreate" }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Order created",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Order" }
+              }
+            }
+          },
+          "400": { "$ref": "#/components/responses/BadRequest" },
+          "404": { "$ref": "#/components/responses/NotFound" }
+        }
+      }
     }
   },
   "components": {
@@ -299,6 +324,36 @@
           "author": { "type": "string" },
           "createdAt": { "type": "string", "format": "date-time" },
           "updatedAt": { "type": "string", "format": "date-time" }
+        }
+      },
+      "Order": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "integer" },
+          "customerName": { "type": "string" },
+          "phone": { "type": "string" },
+          "address": { "type": "string", "nullable": true },
+          "message": { "type": "string", "nullable": true },
+          "productTitle": { "type": "string" },
+          "productPrice": { "type": "integer" },
+          "quantity": { "type": "integer" },
+          "bouquetId": { "type": "integer", "nullable": true },
+          "createdAt": { "type": "string", "format": "date-time" },
+          "updatedAt": { "type": "string", "format": "date-time" }
+        }
+      },
+      "OrderCreate": {
+        "type": "object",
+        "required": ["customerName", "phone", "productTitle", "productPrice"],
+        "properties": {
+          "customerName": { "type": "string", "minLength": 2, "maxLength": 120 },
+          "phone": { "type": "string", "minLength": 7, "maxLength": 30 },
+          "address": { "type": "string", "maxLength": 300 },
+          "message": { "type": "string", "maxLength": 2000 },
+          "productTitle": { "type": "string", "minLength": 2, "maxLength": 120 },
+          "productPrice": { "type": "integer", "minimum": 1 },
+          "quantity": { "type": "integer", "minimum": 1, "maximum": 99 },
+          "bouquetId": { "type": "integer", "nullable": true }
         }
       }
     }

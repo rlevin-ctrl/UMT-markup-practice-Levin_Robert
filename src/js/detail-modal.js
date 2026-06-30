@@ -1,4 +1,6 @@
-﻿import { showSuccessNotification } from "./notifications";
+﻿import { apiClient } from "./apiClient";
+import { showErrorNotification, showSuccessNotification } from "./notifications";
+import { extractErrorMessage } from "./utils";
 
 const detailModal = document.getElementById("detail-modal");
 const orderModal = document.getElementById("order-modal");
@@ -8,6 +10,17 @@ const detailModalContent = document.getElementById("detail-modal-content");
 const orderModalForm = document.getElementById("order-form");
 
 let scrollPosition = 0;
+let pendingOrder = {
+    productTitle: "",
+    productPrice: "",
+    quantity: 1,
+    bouquetId: null,
+};
+
+function parsePriceValue(price) {
+    const num = Number.parseInt(String(price ?? "").replace(/[^\d]/g, ""), 10);
+    return Number.isNaN(num) ? 0 : num;
+}
 
 function syncModalOpenState() {
     const anyModalOpen =
@@ -23,6 +36,20 @@ function openDetailModal() {
 }
 
 function switchToOrderModal() {
+    const title = detailModalContent?.querySelector(".detail-modal-title")?.textContent?.trim() ?? "";
+    const price = detailModalContent?.querySelector(".detail-modal-price")?.textContent?.trim() ?? "";
+    const quantity = Number.parseInt(
+        detailModalContent?.querySelector(".detail-modal-quantity")?.value ?? "1",
+        10,
+    );
+
+    pendingOrder = {
+        productTitle: title,
+        productPrice: price,
+        quantity: Number.isNaN(quantity) || quantity < 1 ? 1 : quantity,
+        bouquetId: pendingOrder.bouquetId,
+    };
+
     if (detailModal) detailModal.classList.remove("is-open");
     if (orderModal) orderModal.classList.add("is-open");
     syncModalOpenState();
@@ -34,6 +61,12 @@ function closeOrderModal() {
     orderModal.classList.remove("is-open");
     syncModalOpenState();
     orderModalForm?.reset();
+    pendingOrder = {
+        productTitle: "",
+        productPrice: "",
+        quantity: 1,
+        bouquetId: null,
+    };
 }
 
 function closeDetailModal() {
@@ -60,8 +93,15 @@ function buildDetailModalMarkup(title, price, desc, img, srcset) {
   `;
 }
 
-function openProductDetail({ title, price, desc, imgSrc, imgSrcset }) {
+function openProductDetail({ title, price, desc, imgSrc, imgSrcset, productId = null }) {
     if (!title || !price || !imgSrc || !detailModalContent) return;
+
+    pendingOrder = {
+        productTitle: title,
+        productPrice: price,
+        quantity: 1,
+        bouquetId: productId ? Number.parseInt(String(productId), 10) || null : null,
+    };
 
     detailModalContent.innerHTML = buildDetailModalMarkup(
         title,
@@ -88,6 +128,7 @@ document.addEventListener("click", (event) => {
                 "",
             imgSrc: img?.src,
             imgSrcset: img?.srcset,
+            productId: bestsellerCard.dataset.productId || null,
         });
         return;
     }
@@ -101,6 +142,7 @@ document.addEventListener("click", (event) => {
             desc: catalogItem.dataset.longDesc || catalogItem.querySelector(".catalog-desc")?.textContent || "",
             imgSrc: img?.src,
             imgSrcset: img?.srcset,
+            productId: catalogItem.dataset.productId || null,
         });
     }
 });
@@ -128,12 +170,47 @@ document.addEventListener("click", (e) => {
     }
 });
 
-orderModalForm?.addEventListener("submit", (e) => {
+orderModalForm?.addEventListener("submit", async (e) => {
     e.preventDefault();
+
+    const submitButton = orderModalForm.querySelector(".order-submit-btn");
     const formData = new FormData(orderModalForm);
-    const name = formData.get("name");
-    const phone = formData.get("phone");
-    showSuccessNotification(`Thank you, ${name}! We will call you at ${phone}.`);
-    orderModalForm.reset();
-    closeOrderModal();
+    const customerName = String(formData.get("name") ?? "").trim();
+    const phone = String(formData.get("phone") ?? "").trim();
+    const productPrice = parsePriceValue(pendingOrder.productPrice);
+
+    if (!pendingOrder.productTitle || productPrice < 1) {
+        showErrorNotification("Please choose a bouquet before placing an order.");
+        return;
+    }
+
+    const payload = {
+        customerName,
+        phone,
+        address: String(formData.get("address") ?? "").trim(),
+        message: String(formData.get("comment") ?? "").trim(),
+        productTitle: pendingOrder.productTitle,
+        productPrice,
+        quantity: pendingOrder.quantity,
+        bouquetId: pendingOrder.bouquetId,
+    };
+
+    if (submitButton) {
+        submitButton.disabled = true;
+        submitButton.textContent = "Sending...";
+    }
+
+    try {
+        await apiClient.post("/orders", payload);
+        showSuccessNotification(`Thank you, ${customerName}! Your order has been placed.`);
+        orderModalForm.reset();
+        closeOrderModal();
+    } catch (error) {
+        showErrorNotification(extractErrorMessage(error, "Failed to place order. Please try again."));
+    } finally {
+        if (submitButton) {
+            submitButton.disabled = false;
+            submitButton.textContent = "Go to Checkout";
+        }
+    }
 });

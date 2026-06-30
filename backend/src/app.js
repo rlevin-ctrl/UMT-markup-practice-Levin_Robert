@@ -6,6 +6,7 @@ import swaggerUi from "swagger-ui-express";
 import bouquetsRouter from "./routes/bouquetsRouter.js";
 import bestsellersRouter from "./routes/bestsellersRouter.js";
 import feedbacksRouter from "./routes/feedbacksRouter.js";
+import ordersRouter from "./routes/ordersRouter.js";
 import errorHandler from "./middleware/errorHandler.js";
 import swaggerDocument from "../swagger/swagger.json" with { type: "json" };
 
@@ -51,6 +52,7 @@ app.use("/photos", express.static(photosPath));
 app.use("/api/bouquets", bouquetsRouter);
 app.use("/api/bestsellers", bestsellersRouter);
 app.use("/api/feedbacks", feedbacksRouter);
+app.use("/api/orders", ordersRouter);
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
 app.get("/health", (_req, res) => {
