@@ -45,6 +45,19 @@ export function mapBouquetToCard(item) {
     };
 }
 
+/** Map backend bestseller shape to frontend card fields. */
+export function mapBestsellerToCard(item) {
+    const photo = item.photoURL ?? item.img ?? "";
+    return {
+        id: item.id,
+        title: item.title ?? "",
+        desc: item.description ?? item.desc ?? "",
+        longDesc: item.longDescription ?? item.longDesc ?? item.description ?? item.desc ?? "",
+        price: formatPriceValue(item.price),
+        img: resolvePublicUrl(photo),
+    };
+}
+
 export function formatPriceValue(price) {
     if (price == null || price === "") return "-";
     const str = String(price).trim();

@@ -45,8 +45,7 @@ async function bootFeedbackSlider() {
     }
 
     try {
-        // ЗМІНЕНО: додано .json
-        const response = await apiClient.get("/feedbacks.json");
+        const response = await apiClient.get("/feedbacks");
         const feedbackItems = Array.isArray(response.data) ? response.data : [];
 
         if (feedbackItems.length === 0) return;

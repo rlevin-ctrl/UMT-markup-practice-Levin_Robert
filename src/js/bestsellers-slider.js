@@ -3,15 +3,15 @@ import { Navigation, A11y } from "swiper/modules";
 import "swiper/css";
 import { apiClient } from "./apiClient";
 import { showErrorNotification } from "./notifications";
-import { extractErrorMessage, resolvePublicUrl } from "./utils";
+import { extractErrorMessage, mapBestsellerToCard } from "./utils";
 
 const track = document.querySelector("#bestsellers-slider-list");
 const dotsContainer = document.querySelector(".carousel-dots");
 
 async function bootBestsellers() {
     try {
-        const response = await apiClient.get("/bestsellers.json");
-        const items = Array.isArray(response.data) ? response.data : [];
+        const response = await apiClient.get("/bestsellers");
+        const items = (Array.isArray(response.data) ? response.data : []).map(mapBestsellerToCard);
 
         if (items.length === 0) return;
 
@@ -50,7 +50,7 @@ async function bootBestsellers() {
                 .replace(/</g, '&lt;')
                 .replace(/>/g, '&gt;');
 
-            const imgUrl = resolvePublicUrl(item.img);
+            const imgUrl = item.img;
 
             slide.innerHTML = `
                 <article class="product-card" data-long-desc="${longDesc}" data-product-id="${item.id ?? ""}">

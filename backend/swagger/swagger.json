@@ -1,9 +1,9 @@
 {
   "openapi": "3.0.3",
   "info": {
-    "title": "Flora Bouquets API",
+    "title": "Flora API",
     "version": "1.0.0",
-    "description": "REST API for Flora bouquets collection"
+    "description": "REST API for Flora — bouquets, bestsellers, and feedback"
   },
   "servers": [{ "url": "/api" }],
   "paths": {
@@ -161,6 +161,42 @@
           "404": { "$ref": "#/components/responses/NotFound" }
         }
       }
+    },
+    "/bestsellers": {
+      "get": {
+        "summary": "Get bestsellers list",
+        "responses": {
+          "200": {
+            "description": "Bestsellers list",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": { "$ref": "#/components/schemas/Bestseller" }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/feedbacks": {
+      "get": {
+        "summary": "Get feedback list",
+        "responses": {
+          "200": {
+            "description": "Feedback list",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": { "$ref": "#/components/schemas/Feedback" }
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -240,6 +276,29 @@
           "page": { "type": "integer" },
           "limit": { "type": "integer" },
           "totalPages": { "type": "integer" }
+        }
+      },
+      "Bestseller": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "integer" },
+          "title": { "type": "string" },
+          "description": { "type": "string" },
+          "longDescription": { "type": "string" },
+          "price": { "type": "integer" },
+          "photoURL": { "type": "string" },
+          "createdAt": { "type": "string", "format": "date-time" },
+          "updatedAt": { "type": "string", "format": "date-time" }
+        }
+      },
+      "Feedback": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "integer" },
+          "text": { "type": "string" },
+          "author": { "type": "string" },
+          "createdAt": { "type": "string", "format": "date-time" },
+          "updatedAt": { "type": "string", "format": "date-time" }
         }
       }
     }

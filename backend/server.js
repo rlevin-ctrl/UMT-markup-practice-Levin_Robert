@@ -2,6 +2,8 @@ import dotenv from "dotenv";
 import app from "./src/app.js";
 import sequelize from "./src/db/sequelize.js";
 import "./src/models/Bouquet.js";
+import "./src/models/Bestseller.js";
+import "./src/models/Feedback.js";
 import { ensureStorageDirs } from "./src/helpers/photoStorage.js";
 
 dotenv.config();

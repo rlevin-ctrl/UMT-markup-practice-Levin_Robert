@@ -28,6 +28,7 @@ Design: [Flora on Figma](https://www.figma.com/design/2Tj16H7IO7dq1ViTvIh57V/Flo
 ### Backend features
 
 - CRUD for bouquets (Sequelize + PostgreSQL)
+- Read-only lists for bestsellers and feedback
 - Joi validation, centralized error handling
 - Photo upload (Multer: temp → `public/photos`)
 - Swagger documentation at `/api-docs`
@@ -50,17 +51,21 @@ npm run dev
 
 Open http://localhost:4000/UMT-markup-practice-Levin_Robert/
 
-For bestsellers and feedback sliders locally, run json-server in a second terminal:
+For local frontend with the real API, create `.env`:
+
+```env
+VITE_API_MODE=server
+VITE_API_BASE_URL=http://localhost:3000/api
+VITE_BOUQUETS_API_URL=http://localhost:3000/api
+```
+
+Or run json-server only for offline mock:
 
 ```bash
 npm run server
 ```
 
-For the bouquets catalog with the real API, set in `.env`:
-
-```env
-VITE_BOUQUETS_API_URL=http://localhost:3000/api
-```
+With json-server, keep `VITE_API_MODE=static` and `VITE_API_BASE_URL=/api`.
 
 ### Backend
 
@@ -81,7 +86,7 @@ API: http://localhost:3000/api — Swagger: http://localhost:3000/api-docs
 npm run build
 ```
 
-Static JSON for bestsellers/feedback is emitted to `dist/api/`. Bouquets load from Render via `VITE_BOUQUETS_API_URL` in `.env.production`.
+Production build uses `.env.production`: all sections load data from the Render API (bouquets, bestsellers, feedback).
 
 ## Project structure
 
