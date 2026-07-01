@@ -7,7 +7,7 @@ import Feedback from "../models/Feedback.js";
 import { buildGravatarUrl } from "./gravatar.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const dbPath = path.resolve(__dirname, "../../../db.json");
+const dbPath = path.resolve(__dirname, "../../../frontend/db.json");
 
 function parsePrice(value) {
     const num = Number.parseInt(String(value).replace(/[^\d]/g, ""), 10);

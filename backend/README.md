@@ -30,7 +30,7 @@ CLIENT_ORIGIN=http://localhost:4000
 npm run dev
 ```
 
-Seed database from root `db.json`:
+Seed database from `frontend/db.json`:
 
 ```bash
 npm run seed
